@@ -1,12 +1,12 @@
-import requests
+from bs4 import BeautifulSoup
+from dotenv import load_dotenv
+from langsmith.wrappers import wrap_openai
 from markdownify import markdownify as md
+from openai import OpenAI
 import argparse
 import os
-from openai import OpenAI
-from langsmith.wrappers import wrap_openai
-from dotenv import load_dotenv
-from bs4 import BeautifulSoup
 import re
+import requests
 
 load_dotenv()
 # Wrap OpenAI API with Langsmith to trace usage
@@ -64,14 +64,15 @@ instructions:
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Convert HTML from a URL to Markdown.")
-    parser.add_argument("url", help="The URL to convert to Markdown")
+    parser.add_argument("urls", nargs="+", help="The URLs to convert to Markdown")
     args = parser.parse_args()
 
-    markdown_content, title = url_to_markdown(args.url)
-    cleaned_content = cleanup_markdown(markdown_content)
+    for url in args.urls:
+        markdown_content, title = url_to_markdown(url)
+        cleaned_content = cleanup_markdown(markdown_content)
 
-    filename = valid_filename(title) + ".md"
-    with open(filename, "w") as f:
-        f.write(cleaned_content)
+        filename = valid_filename(title) + ".md"
+        with open(filename, "w") as f:
+            f.write(cleaned_content)
 
-    print(f"Markdown content written to {filename}")
+        print(f"Markdown content written to {filename}")
